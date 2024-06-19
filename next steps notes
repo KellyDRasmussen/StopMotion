@@ -1,0 +1,132 @@
+### 1. **Android App: Simple Gallery**
+The Simple Gallery app is user-friendly and can be set up to directly access a specific folder where the images are saved. It supports video playback and has an intuitive interface perfect for children.
+
+
+# After saving the image
+shutil.move(file_path, '/path/to/simple/gallery/directory/img_{timestamp}.jpg')
+
+
+
+#### Steps to Set Up Simple Gallery:
+1. **Install Simple Gallery:**
+   - Download and install the Simple Gallery app from the Google Play Store.
+
+2. **Configure the App:**
+   - Open the app and navigate to the settings.
+   - Set the default folder to the directory where the images from the stop-motion rig are saved.
+   - Enable the option to display images and videos.
+
+3. **Usage:**
+   - Your daughter can open the Simple Gallery app, navigate to the saved images, and play them as a slideshow or view the videos.
+
+### 2. **Custom Web Interface**
+If you prefer using a website, you can set up a simple web server on your Raspberry Pi to host the images and provide an interface for creating and playing the stop-motion movies.
+
+#### Steps to Set Up a Custom Web Interface:
+1. **Install Flask:**
+   - Install Flask, a lightweight web framework for Python.
+
+     ```sh
+     pip install flask
+     ```
+
+2. **Create the Web Interface:**
+   - Create a simple Flask app that lists the saved images and provides an option to create and play a video.
+
+3. **Example Flask App:**
+
+   ```python
+   from flask import Flask, render_template, send_from_directory
+   import os
+
+   app = Flask(__name__)
+
+   IMAGE_FOLDER = '/path/to/save/images'
+
+   @app.route('/')
+   def index():
+       images = os.listdir(IMAGE_FOLDER)
+       images = [img for img in images if img.endswith('.jpg')]
+       return render_template('index.html', images=images)
+
+   @app.route('/images/<filename>')
+   def serve_image(filename):
+       return send_from_directory(IMAGE_FOLDER, filename)
+
+   if __name__ == '__main__':
+       app.run(host='0.0.0.0', port=5000)
+   ```
+
+4. **Create a Template (index.html):**
+
+   ```html
+   <!doctype html>
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Stop Motion Viewer</title>
+   </head>
+   <body>
+       <h1>Stop Motion Viewer</h1>
+       <div>
+           {% for image in images %}
+               <img src="{{ url_for('serve_image', filename=image) }}" width="200px">
+           {% endfor %}
+       </div>
+       <button onclick="playSlideshow()">Play Slideshow</button>
+       <script>
+           function playSlideshow() {
+               let images = document.querySelectorAll('img');
+               let index = 0;
+               function showNextImage() {
+                   if (index < images.length) {
+                       images[index].style.display = 'block';
+                       if (index > 0) images[index - 1].style.display = 'none';
+                       index++;
+                       setTimeout(showNextImage, 500); // Change this value for different speeds
+                   } else {
+                       images[index - 1].style.display = 'none';
+                       index = 0;
+                   }
+               }
+               showNextImage();
+           }
+       </script>
+   </body>
+   </html>
+   ```
+
+5. **Run the Flask App:**
+
+   ```sh
+   python app.py
+   ```
+
+6. **Access the Web Interface:**
+   - Open a web browser on the Android tablet and navigate to the Raspberry Pi's IP address and port 5000 (e.g., `http://192.168.1.100:5000`).
+
+
+or 
+
+Steps to Use Stop Motion Studio:
+Install Stop Motion Studio:
+
+Download and install the Stop Motion Studio app from the Google Play Store.
+Transfer Images to Android Device:
+
+Use a shared directory accessible by both the Raspberry Pi and the Android device, or manually transfer the captured images to the Android device.
+Import Images to Stop Motion Studio:
+
+Open Stop Motion Studio on the Android device.
+Create a new project and import the images to create the stop-motion video.
+Code Snippet for File Transfer:
+Here's the code snippet to save the captured images to a shared directory:
+
+python
+Copy code
+import shutil
+
+# Assuming file_path is the path where the image was initially saved
+shared_directory = '/path/to/shared/directory'
+shutil.move(file_path, os.path.join(shared_directory, f'img_{timestamp}.jpg'))
