@@ -1,8 +1,3 @@
-# stop_motion.py
-# Read Bluetooth Remote Shutter
-# from /dev/input/event5 and /dev/input/event6
-# filter for key down of ENTER and VOLUMNUP
-
 from evdev import InputDevice, categorize, ecodes
 import asyncio
 import os
@@ -10,9 +5,9 @@ from datetime import datetime
 import shutil
 from picamera import PiCamera
 
-# Define your input devices
-Shutter5 = InputDevice('/dev/input/event5')
-Shutter6 = InputDevice('/dev/input/event6')
+# Replace these paths with the correct event device paths for your Bluetooth remote
+Shutter1 = InputDevice('/dev/input/event0')  # Example device path
+Shutter2 = InputDevice('/dev/input/event1')  # Example device path
 
 # Initialize the Pi camera
 pi_cam = PiCamera()
@@ -21,8 +16,8 @@ EV_VAL_PRESSED = 1
 KEY_ENTER = 28
 KEY_VOLUMNUP = 115
 
-print(Shutter5)
-print(Shutter6)
+print(Shutter1)
+print(Shutter2)
 print('=== Start ===')
 
 # Function to capture image from Lifecam HD-6000 using fswebcam
@@ -53,10 +48,11 @@ async def print_events(device):
             print(device.path, categorize(event), sep=': ')
             print('---')
 
-for device in Shutter5, Shutter6:
+for device in [Shutter1, Shutter2]:
     asyncio.ensure_future(print_events(device))
 
 loop = asyncio.get_event_loop()
 loop.run_forever()
 
-
+# Release the cameras when done
+pi_cam.close()
