@@ -20,8 +20,8 @@ This project sets up a stop-motion rig using a Raspberry Pi, a Lifecam HD-6000, 
 1. Clone this repository:
 
     ```sh
-    git clone https://github.com/your-username/your-repo-name.git
-    cd your-repo-name
+    git clone https://github.com/KellyDRasmussen/StopMotion.git
+    cd StopMotion
     ```
 
 2. Install the required Python packages:
