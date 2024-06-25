@@ -1,147 +1,69 @@
 # Stop Motion Rig
 
-This project sets up a stop-motion rig using a Raspberry Pi, a Lifecam HD-6000, and a Bluetooth remote as the trigger.
+This project sets up a stop-motion rig using a Raspberry Pi Zero W, a ZeroCam, and a keyboard as the trigger.
 
 ## Setup
 
 ### Prerequisites
 
-1. **Hardware:**
-   - Raspberry Pi
-   - Lifecam HD-6000
-   - Pi Zero camera
-   - Bluetooth Remote
+1. Hardware:
+    * Raspberry Pi Zero W
+    * Pi Zero Camera
+    * Keyboard
 
-2. **Software:**
-   - Python 3.5+
-   - Required Python packages (listed in `requirements.txt`)
-   - `fswebcam` utility
+2. Software:
+    * Python 3.5+
+    * Required Python packages (listed in `requirements.txt`)
+    * `ffmpeg` utility
 
 ### Installation
 
 1. Clone this repository:
-
-    ```sh
-    git clone https://github.com/your-username/your-repo-name.git
+    ```bash
+    git clone https://github.com/KellyDRasmussen/StopMotion.git
     cd your-repo-name
     ```
 
 2. Install the required Python packages:
-
-    ```sh
+    ```bash
     pip install -r requirements.txt
     ```
 
-3. Install `fswebcam`:
-
-    ```sh
-    sudo apt-get install fswebcam
+3. Install `ffmpeg`:
+    ```bash
+    sudo apt-get install ffmpeg
     ```
-
-4. Ensure you have the necessary permissions to access `/dev/input/event*` devices and write to the specified directory.
 
 ### Running the Script
 
-1. **Connect your Bluetooth remote to the Raspberry Pi manually:**
-
-    ```sh
-    bluetoothctl
-    ```
-
-    In the Bluetooth console:
-
-    ```sh
-    agent on
-    default-agent
-    scan on
-    pair XX:XX:XX:XX:XX:XX       # Replace with your device's MAC address
-    trust XX:XX:XX:XX:XX:XX      # Replace with your device's MAC address
-    connect XX:XX:XX:XX:XX:XX    # Replace with your device's MAC address
-    ```
-
-2. **Run the stop motion script:**
-
-    ```sh
+1. Run the stop motion script:
+    ```bash
     python stop_motion.py
     ```
 
-3. **Press the `ENTER` button to capture an image with the Lifecam HD-6000.**
-4. **Press the `VOLUMEUP` button to capture an image with the Pi Zero camera.**
+2. Press the `c` key to capture an image with the ZeroCam.
 
-### Automating Bluetooth Connection
+3. Press the `Esc` key to finish capturing and compile the images into a video.
 
-To automate the Bluetooth pairing and connection process, you can use the provided Python script `bluetooth_connect.py`.
+### Automating Image Compilation
 
-1. **Create the script file:**
-
-    ```sh
-    nano bluetooth_connect.py
-    ```
-
-2. **Copy and paste the following script into the file:**
-
-    ```python
-    import subprocess
-
-    # Replace with your device's MAC address
-    DEVICE_MAC_ADDRESS = "XX:XX:XX:XX:XX:XX"
-
-    commands = [
-        "bluetoothctl power on",
-        "bluetoothctl agent on",
-        "bluetoothctl default-agent",
-        "bluetoothctl scan on",
-        f"bluetoothctl pair {DEVICE_MAC_ADDRESS}",
-        f"bluetoothctl trust {DEVICE_MAC_ADDRESS}",
-        f"bluetoothctl connect {DEVICE_MAC_ADDRESS}",
-        "bluetoothctl scan off"
-    ]
-
-    for command in commands:
-        process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        print(stdout.decode('utf-8'), stderr.decode('utf-8'))
-
-    print("Bluetooth device paired and connected.")
-    ```
-
-3. **Replace `XX:XX:XX:XX:XX:XX` with the MAC address of your Bluetooth device.**
-
-4. **Save and close the file (Ctrl + O, Enter, Ctrl + X).**
-
-5. **Make the script executable:**
-
-    ```sh
-    chmod +x bluetooth_connect.py
-    ```
-
-6. **Run the script:**
-
-    ```sh
-    sudo python3 bluetooth_connect.py
-    ```
-
-This script will automate the process of powering on the Bluetooth, setting the agent, starting the scan, pairing, trusting, and connecting to the device.
+After capturing the images, the script automatically compiles them into a video using `ffmpeg`.
 
 ### Customization
 
-- Update the file paths in `stop_motion.py` to the directories where you want to save the images:
-
+* Update the directory where images are saved in `stop_motion.py` if needed:
     ```python
-    file_path = f'/path/to/save/lifecam/images/img_{timestamp}.jpg'
-    file_path = f'/path/to/save/picam/images/img_{timestamp}.jpg'
+    image_dir = 'images'
     ```
 
-- Update the shared directory for moving the images to a location accessible by the Simple Gallery app:
-
+* Adjust camera settings as needed within the script:
     ```python
-    shutil.move(file_path, '/path/to/simple/gallery/directory/img_{timestamp}.jpg')
+    camera.resolution = (1024, 768)
     ```
+
 
 ## Resources
 
-- [Python evdev documentation](https://python-evdev.readthedocs.io/en/latest/tutorial.html)
-- [Lifecam HD-6000 setup](https://www.bot-thoughts.com/2013/01/lifecam-hd-6000-autofocus-fix-raspberry.html)
-- [Raspberry Pi live cam setup](https://healeycodes.com/raspberry-pi-live-cam)
-- [fswebcam documentation](http://manpages.ubuntu.com/manpages/bionic/man1/fswebcam.1.html)
-- [picamera documentation](https://picamera.readthedocs.io/en/release-1.13/)
+* [Python picamera documentation](https://picamera.readthedocs.io/)
+* [pynput documentation](https://pynput.readthedocs.io/)
+* [ffmpeg documentation](https://ffmpeg.org/documentation.html)
