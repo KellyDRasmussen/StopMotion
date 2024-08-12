@@ -1,43 +1,60 @@
+import pygame
 import os
-import time
-import subprocess
+from time import sleep
 from picamera import PiCamera
-from pynput import keyboard
+import subprocess
 
-# Set up the camera
+# Initialize Pygame
+pygame.init()
+screen = pygame.display.set_mode((640, 480))
+pygame.display.set_caption("Stop Motion")
+
+# Initialize the camera
 camera = PiCamera()
-camera.resolution = (1024, 768)
+camera.resolution = (640, 480)
 
-# Directory to save images
-image_dir = 'images'
-os.makedirs(image_dir, exist_ok=True)
+# Create a directory to store images
+output_dir = "stop_motion"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
+# Set initial variables
+running = True
 image_count = 0
 
-def on_press(key):
-    global image_count
-    try:
-        if key.char == 'c':  # Press 'c' to capture
-            image_path = os.path.join(image_dir, f'image_{image_count:03d}.jpg')
-            camera.capture(image_path)
-            print(f'Captured {image_path}')
-            image_count += 1
-    except AttributeError:
-        pass
+# Main loop
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-def create_video():
-    output_video = 'animation.mp4'
-    ffmpeg_command = [
-        'ffmpeg', '-framerate', '10', '-i', os.path.join(image_dir, 'image_%03d.jpg'),
-        '-c:v', 'libx264', '-r', '30', '-pix_fmt', 'yuv420p', output_video
-    ]
-    subprocess.run(ffmpeg_command)
-    print(f'Video saved as {output_video}')
+        # Take a picture on spacebar press
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                image_count += 1
+                image_path = os.path.join(output_dir, f"frame_{image_count:03d}.jpg")
+                camera.capture(image_path)
+                print(f"Captured {image_path}")
+                sleep(0.5)  # Small delay to avoid multiple captures
 
-# Collect events until released
-with keyboard.Listener(on_press=on_press) as listener:
-    print("Press 'c' to capture an image. Press 'Esc' to finish and create the video.")
-    listener.join()
+            # Exit on ESC press
+            elif event.key == pygame.K_ESCAPE:
+                running = False
 
-# After capturing images, compile them into a video
-create_video()
+    # Update display (could add a preview later)
+    screen.fill((255, 255, 255))  # white background
+    pygame.display.flip()
+
+# Clean up
+camera.close()
+pygame.quit()
+
+# Create a video from the captured images using ffmpeg
+video_name = os.path.join(output_dir, "stop_motion_video.mp4")
+subprocess.run([
+    "ffmpeg", "-framerate", "10", "-i", os.path.join(output_dir, "frame_%03d.jpg"),
+    "-c:v", "libx264", "-r", "30", "-pix_fmt", "yuv420p", video_name
+])
+
+print("Done! Images saved to", output_dir)
+print(f"Video created: {video_name}")
