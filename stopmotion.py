@@ -4,6 +4,16 @@ from time import sleep
 from picamera import PiCamera
 import subprocess
 
+# Function to find the next available folder name
+def get_next_folder_name(base_dir="stop_motion"):
+    folder_number = 1
+    while True:
+        folder_name = os.path.join(base_dir, f"session_{folder_number:03d}")
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+            return folder_name
+        folder_number += 1
+
 # Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((640, 480))
@@ -13,10 +23,11 @@ pygame.display.set_caption("Stop Motion")
 camera = PiCamera()
 camera.resolution = (640, 480)
 
-# Create a directory to store images
-output_dir = "stop_motion"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# Start the camera preview
+camera.start_preview(fullscreen=False, window=(0, 0, 640, 480))
+
+# Create a new directory for the current session
+output_dir = get_next_folder_name()
 
 # Set initial variables
 running = True
@@ -41,11 +52,12 @@ while running:
             elif event.key == pygame.K_ESCAPE:
                 running = False
 
-    # Update display (could add a preview later)
-    screen.fill((255, 255, 255))  # white background
+    # Update display (Pygame window shows camera preview)
+    screen.fill((255, 255, 255))  # Keep background white
     pygame.display.flip()
 
 # Clean up
+camera.stop_preview()
 camera.close()
 pygame.quit()
 
